@@ -1,0 +1,24 @@
+# Build folders
+bin/
+obj/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.tmp
+*.log
+*.pdb
+
+# Configuration files
+config.json
+
+# Rider, JetBrains IDEs
+.idea/
+
+# Publish folder (if any)
+publish/
+
+# Others you might want to ignore
+*.db
+*.bak
