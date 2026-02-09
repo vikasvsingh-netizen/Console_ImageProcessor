@@ -8,6 +8,6 @@ namespace ImageProcessor.Model
 {
     public enum LibrariesEnum
     {
-        ImageMagick,ImageSharp,KrakenProcessor
+        ImageMagick,ImageSharp,KrakenProcessor,KrakenSdkProcessor
     }
 }

@@ -1,7 +1,8 @@
 ﻿using ImageMagick;
-using ImageProcessor.Model;
-using System.IO;
 using ImageProcessor.Contract;
+using ImageProcessor.Model;
+using Kraken.Model;
+using System.IO;
 
 namespace ImageProcessor.Concrete
 {
@@ -26,9 +27,12 @@ namespace ImageProcessor.Concrete
             // 1️⃣ Strip metadata (EXIF, GPS, etc.)
             original.Strip();
 
-            ProcessSet(original, fileName, libraryRoot, "thumbnails", _config.Thumbnails);
-            ProcessSet(original, fileName, libraryRoot, "grid", _config.Grid);
-            ProcessSet(original, fileName, libraryRoot, "fullpage", _config.FullPage);
+            if (_config != null && _config.Thumbnails != null && _config.Thumbnails.Count > 0)
+                ProcessSet(original, fileName, libraryRoot, "thumbnails", _config.Thumbnails);
+            if (_config != null && _config.Grid != null && _config.Grid.Count > 0)
+                ProcessSet(original, fileName, libraryRoot, "grid", _config.Grid);
+            if (_config != null && _config.FullPage != null && _config.FullPage.Count > 0)
+                ProcessSet(original, fileName, libraryRoot, "fullpage", _config.FullPage);
         }
 
         private void ProcessSet(

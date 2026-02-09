@@ -25,9 +25,13 @@ namespace ImageProcessor.Concrete
             string fileName = Path.GetFileNameWithoutExtension(inputFilePath);
             string libraryFolder = Path.Combine(outputRoot, "ImageSharp");
             image.Mutate(x => x.Saturate(0.95f).Brightness(1.02f).Contrast(1.05f));
-            ProcessSet(image, fileName, libraryFolder, "thumbnails", _config.Thumbnails);
-            ProcessSet(image, fileName, libraryFolder, "grid", _config.Grid);
-            ProcessSet(image, fileName, libraryFolder, "fullpage", _config.FullPage);
+
+            if (_config != null && _config.Thumbnails != null && _config.Thumbnails.Count > 0)
+                ProcessSet(image, fileName, libraryFolder, "thumbnails", _config.Thumbnails);
+            if (_config != null && _config.Grid != null && _config.Grid.Count > 0)
+                ProcessSet(image, fileName, libraryFolder, "grid", _config.Grid);
+            if (_config != null && _config.FullPage != null && _config.FullPage.Count > 0)
+                ProcessSet(image, fileName, libraryFolder, "fullpage", _config.FullPage);
         }
 
         private void ProcessSet(Image source, string fileName, string libraryFolder, string type, List<ImageSize> sizes)

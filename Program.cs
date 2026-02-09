@@ -1,25 +1,25 @@
-﻿using SixLabors.ImageSharp;
+﻿using ImageProcessor;
+using ImageProcessor.Contract;
+using ImageProcessor.Model;
+using Microsoft.Extensions.Configuration;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Processing;
 using System;
-using System.IO;
-using System.Threading.Tasks;
-
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
-using ImageProcessor.Model;
-using ImageProcessor;
-using ImageProcessor.Contract;
-using System.Diagnostics;
+using System.Threading.Tasks;
 
 class Program
 {
     static void Main()
     {
-        LibrariesEnum [] libraries = new LibrariesEnum[] { LibrariesEnum.ImageMagick, LibrariesEnum.ImageSharp, LibrariesEnum.KrakenProcessor };
-        
+        LibrariesEnum[] libraries = new LibrariesEnum[] {LibrariesEnum.ImageMagick, LibrariesEnum.ImageSharp }; //{ LibrariesEnum.KrakenSdkProcessor };
+
         // 1️⃣ Read config from JSON file
         var configJson = File.ReadAllText("config.json");
         var appConfig = JsonSerializer.Deserialize<AppConfig>(configJson);
@@ -27,6 +27,12 @@ class Program
         foreach (var lib in libraries)
         {
             appConfig.Library = lib;
+            var configuration = new ConfigurationBuilder()
+                      .AddJsonFile("appsettings.json", optional: true)
+                      .AddUserSecrets<Program>() 
+                      .Build();
+
+            ProcessorFactory.Initialize(configuration);
             IImageProcessor processor = ProcessorFactory.GetProcessor(appConfig);
             processor.SetSizeConfigs(appConfig.SizeConfig);
 
@@ -34,7 +40,7 @@ class Program
             // 2️⃣ Process all files in parallel
             var files = Directory.GetFiles(appConfig.InputFolder);
 
-            Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, file =>
+            Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = lib == LibrariesEnum.KrakenSdkProcessor ? 1 : Environment.ProcessorCount }, file =>
             {
                 try
                 {
