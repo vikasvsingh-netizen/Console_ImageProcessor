@@ -24,7 +24,7 @@ namespace ImageProcessor.Concrete
 
             using var original = new MagickImage(inputFilePath);
 
-            // 1️⃣ Strip metadata (EXIF, GPS, etc.)
+            original.AutoOrient();
             original.Strip();
 
             if (_config != null && _config.Thumbnails != null && _config.Thumbnails.Count > 0)
@@ -49,7 +49,6 @@ namespace ImageProcessor.Concrete
 
                 using var clone = source.Clone();
 
-                // 2️⃣ Resize BEFORE compression
                 if ((source.Width >= size.Width * 1.05))
                 {
                     clone.Resize(new MagickGeometry((uint)size.Width, 0)
@@ -59,19 +58,15 @@ namespace ImageProcessor.Concrete
                     clone.FilterType = size.Width <= 400 ? FilterType.Mitchell : FilterType.Lanczos;
                 }
 
-                // 3️⃣ Light sharpening after resize
                 double sharpenAmount =
                     size.Width <= 400 ? 0.35 :
                     size.Width <= 800 ? 0.25 :
                     size.Width <= 1600 ? 0.15 : 0.10;
 
-                clone.UnsharpMask(0, 0.4, sharpenAmount, 0.02);
-
-                // 3.1️⃣ Optional: color adjustments
+                clone.UnsharpMask(0, 0.4, sharpenAmount, 0.02); 
                 clone.Modulate(new Percentage(102), new Percentage(95), new Percentage(100));
                 clone.Contrast();
 
-                // 4️⃣ WebP output settings
                 clone.Format = MagickFormat.WebP;
                 clone.Quality = (uint)size.Quality;
 
@@ -80,10 +75,9 @@ namespace ImageProcessor.Concrete
                 else clone.Settings.SetDefine("webp:lossless", "false");
 
                 clone.Settings.SetDefine("webp:alpha-quality", "90");
-
-                // 5️⃣ Best WebP compression
                 clone.Settings.SetDefine("webp:method", "6");
                 clone.Strip();
+
                 string outputPath = Path.Combine(
                     outputDir,
                     $"{fileName}_{type}_{size.Width}.webp"

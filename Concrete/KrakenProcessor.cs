@@ -31,9 +31,13 @@ namespace ImageProcessor.Concrete
             string fileName = Path.GetFileNameWithoutExtension(inputFilePath);
             string libraryRoot = Path.Combine(outputRoot, "Kraken");
 
-            //ProcessSet(inputFilePath, fileName, libraryRoot, "thumbnails", _config.Thumbnails);
-            //ProcessSet(inputFilePath, fileName, libraryRoot, "grid", _config.Grid);
-            ProcessSet(inputFilePath, fileName, libraryRoot, "fullpage", _config.FullPage);
+
+            if (_config != null && _config.Thumbnails != null && _config.Thumbnails.Count > 0)
+                ProcessSet(inputFilePath, fileName, libraryRoot, "thumbnails", _config.Thumbnails);
+            if (_config != null && _config.Grid != null && _config.Grid.Count > 0)
+                ProcessSet(inputFilePath, fileName, libraryRoot, "grid", _config.Grid);
+            if (_config != null && _config.FullPage != null && _config.FullPage.Count > 0)
+                ProcessSet(inputFilePath, fileName, libraryRoot, "fullpage", _config.FullPage);
         }
 
         private void ProcessSet(

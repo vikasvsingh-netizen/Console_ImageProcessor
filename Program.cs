@@ -18,7 +18,8 @@ class Program
 {
     static void Main()
     {
-        LibrariesEnum[] libraries = new LibrariesEnum[] {LibrariesEnum.ImageMagick, LibrariesEnum.ImageSharp }; //{ LibrariesEnum.KrakenSdkProcessor };
+        LibrariesEnum[] libraries = new LibrariesEnum[] { LibrariesEnum.KrakenSdkProcessor };
+        // {LibrariesEnum.ImageMagick, LibrariesEnum.ImageSharp };
 
         // 1️⃣ Read config from JSON file
         var configJson = File.ReadAllText("config.json");

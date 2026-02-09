@@ -20,6 +20,7 @@ namespace ImageProcessor.Concrete
         public void ProcessImage(string inputFilePath, string outputRoot)
         {
             using var image = Image.Load(inputFilePath);
+            image.Mutate(x => x.AutoOrient());
             image.Metadata.ExifProfile = null; // remove metadata
 
             string fileName = Path.GetFileNameWithoutExtension(inputFilePath);
