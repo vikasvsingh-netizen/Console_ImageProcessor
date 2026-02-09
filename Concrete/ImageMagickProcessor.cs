@@ -26,8 +26,8 @@ namespace ImageProcessor.Concrete
             // 1️⃣ Strip metadata (EXIF, GPS, etc.)
             original.Strip();
 
-            //ProcessSet(original, fileName, libraryRoot, "thumbnails", _config.Thumbnails);
-            //ProcessSet(original, fileName, libraryRoot, "grid", _config.Grid);
+            ProcessSet(original, fileName, libraryRoot, "thumbnails", _config.Thumbnails);
+            ProcessSet(original, fileName, libraryRoot, "grid", _config.Grid);
             ProcessSet(original, fileName, libraryRoot, "fullpage", _config.FullPage);
         }
 
@@ -46,27 +46,35 @@ namespace ImageProcessor.Concrete
                 using var clone = source.Clone();
 
                 // 2️⃣ Resize BEFORE compression
-                if ((source.Width >= size.Width))
+                if ((source.Width >= size.Width * 1.05))
                 {
                     clone.Resize(new MagickGeometry((uint)size.Width, 0)
                     {
                         IgnoreAspectRatio = false
                     });
+                    clone.FilterType = size.Width <= 400 ? FilterType.Mitchell : FilterType.Lanczos;
                 }
 
                 // 3️⃣ Light sharpening after resize
-                clone.UnsharpMask(0, 0.4, 0.6, 0.02);
+                double sharpenAmount =
+                    size.Width <= 400 ? 0.35 :
+                    size.Width <= 800 ? 0.25 :
+                    size.Width <= 1600 ? 0.15 : 0.10;
+
+                clone.UnsharpMask(0, 0.4, sharpenAmount, 0.02);
 
                 // 3.1️⃣ Optional: color adjustments
                 clone.Modulate(new Percentage(102), new Percentage(95), new Percentage(100));
+                clone.Contrast();
 
                 // 4️⃣ WebP output settings
                 clone.Format = MagickFormat.WebP;
                 clone.Quality = (uint)size.Quality;
 
-                clone.FilterType = FilterType.Lanczos;
+                if (size.Quality >= 85)
+                { clone.Settings.SetDefine("webp:lossless", "true"); }
+                else clone.Settings.SetDefine("webp:lossless", "false");
 
-                clone.Settings.SetDefine("webp:lossless", "false");
                 clone.Settings.SetDefine("webp:alpha-quality", "90");
 
                 // 5️⃣ Best WebP compression

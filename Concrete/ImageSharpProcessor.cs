@@ -25,8 +25,8 @@ namespace ImageProcessor.Concrete
             string fileName = Path.GetFileNameWithoutExtension(inputFilePath);
             string libraryFolder = Path.Combine(outputRoot, "ImageSharp");
             image.Mutate(x => x.Saturate(0.95f).Brightness(1.02f).Contrast(1.05f));
-            //ProcessSet(image, fileName, libraryFolder, "thumbnails", _config.Thumbnails);
-            //ProcessSet(image, fileName, libraryFolder, "grid", _config.Grid);
+            ProcessSet(image, fileName, libraryFolder, "thumbnails", _config.Thumbnails);
+            ProcessSet(image, fileName, libraryFolder, "grid", _config.Grid);
             ProcessSet(image, fileName, libraryFolder, "fullpage", _config.FullPage);
         }
 
@@ -40,19 +40,24 @@ namespace ImageProcessor.Concrete
                 
                     using var clone = source.Clone(ctx =>
                     {
-                        if (source.Width >= size.Width)
+                        if (source.Width >= size.Width * 1.05)
                         {
                             ctx.Resize(new ResizeOptions
                             {
                                 Mode = ResizeMode.Max,
                                 Size = new Size(size.Width, 0),
-                                Sampler = KnownResamplers.Lanczos3
+                                Sampler = size.Width <= 400 ? KnownResamplers.MitchellNetravali : KnownResamplers.Lanczos3
                             });
                         }
-                        ctx.GaussianSharpen(0.25f);
+                        float sharpen =
+                                size.Width <= 400 ? 0.35f :
+                                size.Width <= 800 ? 0.25f :
+                                size.Width <= 1600 ? 0.15f :
+                                0.10f;
+                        ctx.GaussianSharpen(sharpen);
                     });
 
-                var encoder = new WebpEncoder { Quality = size.Quality, Method = WebpEncodingMethod.BestQuality , NearLossless = false };
+                var encoder = new WebpEncoder { Quality = size.Quality, Method = WebpEncodingMethod.BestQuality , NearLossless = size.Quality >= 85, UseAlphaCompression = true};
                 string outputPath = Path.Combine(outputFolder, $"{fileName}_{type}_{size.Width}.webp");
                 clone.Metadata.ExifProfile = null;
                 clone.Metadata.IccProfile = null;
