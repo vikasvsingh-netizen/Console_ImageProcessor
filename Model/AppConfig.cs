@@ -11,6 +11,8 @@ namespace ImageProcessor.Model
         public LibrariesEnum Library { get; set; }
         public string InputFolder { get; set; }
         public string OutputFolder { get; set; }
+        public string KrakenApiKey { get; set; }
+        public string KrakenApiSecret { get; set; }
         public ImageSizeConfig SizeConfig { get; set; }
     }
 
